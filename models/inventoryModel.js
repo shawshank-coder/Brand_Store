@@ -19,7 +19,7 @@ const inventorySchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    promotion: {
+    promotionDiscount: {
         type: Number,
         default: 0
     },

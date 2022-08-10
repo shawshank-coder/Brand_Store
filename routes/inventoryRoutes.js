@@ -5,15 +5,15 @@ const router = express.Router();
 
 router.get('/', inventoryController.getAllInventory)
 
-router.post('/', inventoryController.createInventory)
+router.post('/', authController.protect, authController.restrictTo('retailer'), inventoryController.createInventory)
 
 
 router.get('/brand/:brand_id', inventoryController.getInventoryByBrandId);
 
 
-router.post('/promotion', inventoryController.createPromotion)
+router.post('/promotion', authController.protect, authController.restrictTo('retailer'), inventoryController.createPromotion)
 
-router.patch('/promotion', inventoryController.updatePromotion)
+router.patch('/promotion', authController.protect, authController.restrictTo('retailer'), inventoryController.updatePromotion)
 
 
 module.exports = router;

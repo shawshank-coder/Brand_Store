@@ -1,7 +1,7 @@
-const catchAsync = require('./../utils/catchAsync')
+const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Inventory = require('../models/inventoryModel');
-
+const Product = require('../models/productModel');
 
 exports.getAllInventory = catchAsync(async(req, res, next)=>{
     const allInventory = await Inventory.find({retailerId: req.user._id});
@@ -15,21 +15,92 @@ exports.getAllInventory = catchAsync(async(req, res, next)=>{
 })
 
 
+exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
+    const product = await Product.findOne({user_id: req.body.brand_id});
+    const allInventoryByBrand = await Inventory.find({retailerId: req.user._id, productId: product._id});
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            allInventoryByBrand
+        }
+    });
+})
+
+
 exports.createInventory = catchAsync(async(req, res, next)=>{
-    if(req.user.id != req.body.user_id){
-        return next(new AppError("User not authorized for this brand"))
-    }
-    const product = await Inventory.find({user_id: req.body.user_id, name: req.body.name});
-    console.log("product:", product);
+    const product = await Product.findOne({id: req.body.productId});
+
     if(product){
-        return next(new AppError("Inventory with same name for same brand already exist!"));
+        return next(new AppError("Product with given id doesn't exist!"));
     }
-    const doc = await Product.create(req.body);
+    let {productId, retailerId, availCnt, promotion} = {...req.body};
+    let soldCnt = 0;
+    let currPrice = product.mrp - promotion;
+    let productBody = {
+        productId,
+        retailerId,
+        availCnt,
+        soldCnt,
+        promotion,
+        currPrice
+    } 
+    const doc = await Inventory.create(productBody);
     console.log(doc);
     res.status(201).json({
         status: 'success',
         data: {
-            product: doc
+            inventory: doc
+        }
+    });
+})
+
+
+exports.createPromotion = catchAsync(async(req, res, next)=>{
+    const product = await Product.findOne({id: req.body.productId});
+
+    if(product){
+        return next(new AppError("Product with given id doesn't exist!"));
+    }
+    let {productId, retailerId, promotion} = {...req.body};
+    let currPrice = product.mrp - promotion;
+    let productBody = {
+        productId,
+        retailerId,
+        promotion,
+        currPrice
+    } 
+    const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
+    console.log(doc);
+    res.status(201).json({
+        status: 'success',
+        data: {
+            inventory: doc
+        }
+    });
+})
+
+
+exports.updatePromotion = catchAsync(async(req, res, next)=>{
+    const product = await Product.findOne({id: req.body.productId});
+
+    if(product){
+        return next(new AppError("Product with given id doesn't exist!"));
+    }
+    let {productId, retailerId, promotion} = {...req.body};
+    let currPrice = product.mrp - promotion;
+    let productBody = {
+        productId,
+        retailerId,
+        promotion,
+        currPrice
+    } 
+    const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
+    console.log(doc);
+    res.status(201).json({
+        status: 'success',
+        data: {
+            inventory: doc
         }
     });
 })
