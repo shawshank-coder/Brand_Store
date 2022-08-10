@@ -4,13 +4,11 @@ const inventoryController = require('../controllers/inventoryController');
 
 const router = express.Router();
 
-router.get('/', inventoryController.getAllInventory)
+router.get('/', authController.protect, authController.restrictTo('retailer'), inventoryController.getAllInventoryByRetailer)
 
 router.post('/', authController.protect, authController.restrictTo('retailer'), inventoryController.createInventory)
 
-
-router.get('/brand/:brand_id', inventoryController.getInventoryByBrandId);
-
+router.get('/brand', authController.protect, authController.restrictTo('brand'),inventoryController.getInventoryByBrandId);
 
 router.post('/promotion', authController.protect, authController.restrictTo('retailer'), inventoryController.createPromotion)
 

@@ -5,7 +5,7 @@ const Product = require('../models/productModel');
 // const sendEmail = require('../utils/sendEmail');
 
 
-exports.getAllInventory = catchAsync(async(req, res, next)=>{
+exports.getAllInventoryByRetailer = catchAsync(async(req, res, next)=>{
     const allInventory = await Inventory.find({retailerId: req.user._id});
 
     res.status(201).json({
@@ -21,7 +21,7 @@ exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
     const products = await Product.find({user_id: req.user._id});
 
 
-    const allInventoryByBrand = products.map(async(product)=> { return await Inventory.findOne({productId: product._id}) });
+    const allInventoryByBrand = products.map(async(product)=> { return await Inventory.findOne({productId: product.id}) });
 
     res.status(201).json({
         status: 'success',
@@ -35,12 +35,13 @@ exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
 exports.createInventory = catchAsync(async(req, res, next)=>{
     const product = await Product.findOne({id: req.body.productId});
 
-    if(product){
+    if(!product){
         return next(new AppError("Product with given id doesn't exist!"));
     }
-    let {productId, retailerId, availCnt, promotion} = {...req.body};
+    let {productId, availCnt, promotionDiscount} = {...req.body};
     let soldCnt = 0;
-    let currPrice = product.mrp - promotion;
+    let retailerId = req.user._id;
+    let currPrice = product.mrp - promotionDiscount;
     let productBody = {
         productId,
         retailerId,
@@ -63,17 +64,19 @@ exports.createInventory = catchAsync(async(req, res, next)=>{
 
 
 exports.createPromotion = catchAsync(async(req, res, next)=>{
-    const product = await Product.findOne({id: req.body.productId});
+    const inventory = await Inventory.findOne({productId: req.body.productId, reatilerId: req.user._id});
 
-    if(product){
-        return next(new AppError("Product with given id doesn't exist!"));
+    if(!inventory){
+        return next(new AppError("Inventory with given details doesn't exist!"));
     }
-    let {productId, retailerId, promotion} = {...req.body};
-    let currPrice = product.mrp - promotion;
+    let {productId, promotionDiscount} = {...req.body};
+    let retailerId = req.user._id;
+    let mrp = inventory.currPrice + inventory.promotionDiscount;
+    let currPrice = mrp - promotionDiscount;
     let productBody = {
         productId,
         retailerId,
-        promotion,
+        promotionDiscount,
         currPrice
     } 
 
@@ -91,7 +94,7 @@ exports.createPromotion = catchAsync(async(req, res, next)=>{
     //       }
     // });
 
-    const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
+    const doc = await Inventory.findByIdAndUpdate(inventory._id, productBody);
     console.log(doc);
     res.status(201).json({
         status: 'success',
@@ -103,21 +106,21 @@ exports.createPromotion = catchAsync(async(req, res, next)=>{
 
 
 exports.updatePromotion = catchAsync(async(req, res, next)=>{
-    const product = await Product.findOne({id: req.body.productId});
+    const inventory = await Inventory.findOne({productId: req.body.productId, reatilerId: req.user._id});
 
-    if(product){
-        return next(new AppError("Product with given id doesn't exist!"));
+    if(!inventory){
+        return next(new AppError("Inventory with given details doesn't exist!"));
     }
-    let {productId, retailerId, promotion} = {...req.body};
-    let currPrice = product.mrp - promotion;
+    let {productId, promotionDiscount} = {...req.body};
+    let retailerId = req.user._id;
+    let mrp = inventory.currPrice + inventory.promotionDiscount;
+    let currPrice = mrp - promotionDiscount;
     let productBody = {
         productId,
         retailerId,
-        promotion,
+        promotionDiscount,
         currPrice
     } 
-    const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
-
       
     // const mailOptions = {
     //     from: 'youremail@gmail.com',
@@ -133,6 +136,7 @@ exports.updatePromotion = catchAsync(async(req, res, next)=>{
     //       }
     // });
 
+    const doc = await Inventory.findByIdAndUpdate(inventory._id, productBody);
     console.log(doc);
     res.status(201).json({
         status: 'success',
