@@ -21,10 +21,8 @@ exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
     const products = await Product.find({user_id: req.user._id});
 
     const inventoryByBrand = [];
-    
-    products.forEach(e)
 
-    const allInventoryByBrand = products.map(product => await Inventory.find({productId: product._id}));
+    const allInventoryByBrand = products.map(product => await Inventory.findOne({productId: product._id}));
 
     res.status(201).json({
         status: 'success',
@@ -80,19 +78,19 @@ exports.createPromotion = catchAsync(async(req, res, next)=>{
         currPrice
     } 
 
-    const mailOptions = {
-        from: 'youremail@gmail.com',
-        to: 'myfriend@yahoo.com',
-        subject: `Promotion Updated on Store with id ${retailerId}`,
-        text: `New Price for productId ${productId} is ${currPrice}`
-    }
-    sendEmail(mailOptions, (error, info)=>{
-        if (error) {
-            console.log(error);
-          } else {
-            console.log('Email sent: ' + info.response);
-          }
-    });
+    // const mailOptions = {
+    //     from: 'retailer1@gmail.com',
+    //     to: 'brand1@gmail.com',
+    //     subject: `Promotion Updated on Store with id ${retailerId}`,
+    //     text: `New Price for productId ${productId} is ${currPrice}`
+    // }
+    // sendEmail(mailOptions, (error, info)=>{
+    //     if (error) {
+    //         console.log(error);
+    //       } else {
+    //         console.log('Email sent: ' + info.response);
+    //       }
+    // });
 
     const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
     console.log(doc);
@@ -122,19 +120,19 @@ exports.updatePromotion = catchAsync(async(req, res, next)=>{
     const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
 
       
-    const mailOptions = {
-        from: 'youremail@gmail.com',
-        to: 'myfriend@yahoo.com',
-        subject: `Promotion Updated on Store with id ${retailerId}`,
-        text: `New Price for productId ${productId} is ${currPrice}`
-    }
-    sendEmail(mailOptions, (error, info)=>{
-        if (error) {
-            console.log(error);
-          } else {
-            console.log('Email sent: ' + info.response);
-          }
-    });
+    // const mailOptions = {
+    //     from: 'youremail@gmail.com',
+    //     to: 'myfriend@yahoo.com',
+    //     subject: `Promotion Updated on Store with id ${retailerId}`,
+    //     text: `New Price for productId ${productId} is ${currPrice}`
+    // }
+    // sendEmail(mailOptions, (error, info)=>{
+    //     if (error) {
+    //         console.log(error);
+    //       } else {
+    //         console.log('Email sent: ' + info.response);
+    //       }
+    // });
 
     console.log(doc);
     res.status(201).json({

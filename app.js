@@ -5,7 +5,7 @@ const AppError = require('./utils/appError');
 
 const userRouter = require('./routes/userRoutes');
 const productRouter = require('./routes/productRoutes');
-const inventoryRouter = require('./routes/userRoutes');
+const inventoryRouter = require('./routes/inventoryRoutes');
 
 app.use(express.json()); 
 
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/product', productRouter);
-app.use('/api/v1/store', inventoryRouter);
+app.use('/api/v1/inventory', inventoryRouter);
 
 
 app.all('*', (req, res, next)=>{

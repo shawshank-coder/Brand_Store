@@ -3,7 +3,7 @@ const productController = require('../controllers/productController');
 const authController = require('../controllers/authController')
 const router = express.Router();
 
-router.get('/', authController.protect, authController.restrictTo('brand'), productController.getAllProducts);
+router.get('/', productController.getAllProducts);
 
 router.post('/', authController.protect, authController.restrictTo('brand'), productController.createProduct);
 
