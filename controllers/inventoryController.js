@@ -2,7 +2,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Inventory = require('../models/inventoryModel');
 const Product = require('../models/productModel');
-const sendEmail = require('../utils/sendEmail');
+// const sendEmail = require('../utils/sendEmail');
 
 
 exports.getAllInventory = catchAsync(async(req, res, next)=>{
@@ -20,9 +20,8 @@ exports.getAllInventory = catchAsync(async(req, res, next)=>{
 exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
     const products = await Product.find({user_id: req.user._id});
 
-    const inventoryByBrand = [];
 
-    const allInventoryByBrand = products.map(product => await Inventory.findOne({productId: product._id}));
+    const allInventoryByBrand = products.map(async(product)=> { return await Inventory.findOne({productId: product._id}) });
 
     res.status(201).json({
         status: 'success',

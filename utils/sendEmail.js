@@ -8,6 +8,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const mailOptions = {
+        from: 'youremail@gmail.com',
+        to: 'myfriend@yahoo.com',
+        subject: "Promotion Updated on Store with id",
+        text: "New Price for productId ${productId} is ${currPrice}"
+    }
 
 transporter.sendMail(mailOptions, function(error, info){
   if (error) {
