@@ -2,6 +2,8 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Inventory = require('../models/inventoryModel');
 const Product = require('../models/productModel');
+const sendEmail = require('../utils/sendEmail');
+
 
 exports.getAllInventory = catchAsync(async(req, res, next)=>{
     const allInventory = await Inventory.find({retailerId: req.user._id});
@@ -16,8 +18,13 @@ exports.getAllInventory = catchAsync(async(req, res, next)=>{
 
 
 exports.getInventoryByBrandId = catchAsync(async(req, res, next)=>{
-    const product = await Product.findOne({user_id: req.body.brand_id});
-    const allInventoryByBrand = await Inventory.find({retailerId: req.user._id, productId: product._id});
+    const products = await Product.find({user_id: req.user._id});
+
+    const inventoryByBrand = [];
+    
+    products.forEach(e)
+
+    const allInventoryByBrand = products.map(product => await Inventory.find({productId: product._id}));
 
     res.status(201).json({
         status: 'success',
@@ -46,6 +53,8 @@ exports.createInventory = catchAsync(async(req, res, next)=>{
         currPrice
     } 
     const doc = await Inventory.create(productBody);
+
+
     console.log(doc);
     res.status(201).json({
         status: 'success',
@@ -70,6 +79,21 @@ exports.createPromotion = catchAsync(async(req, res, next)=>{
         promotion,
         currPrice
     } 
+
+    const mailOptions = {
+        from: 'youremail@gmail.com',
+        to: 'myfriend@yahoo.com',
+        subject: `Promotion Updated on Store with id ${retailerId}`,
+        text: `New Price for productId ${productId} is ${currPrice}`
+    }
+    sendEmail(mailOptions, (error, info)=>{
+        if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+          }
+    });
+
     const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
     console.log(doc);
     res.status(201).json({
@@ -96,6 +120,22 @@ exports.updatePromotion = catchAsync(async(req, res, next)=>{
         currPrice
     } 
     const doc = await Inventory.findByIdAndUpdate(req.body.inventoryId, productBody);
+
+      
+    const mailOptions = {
+        from: 'youremail@gmail.com',
+        to: 'myfriend@yahoo.com',
+        subject: `Promotion Updated on Store with id ${retailerId}`,
+        text: `New Price for productId ${productId} is ${currPrice}`
+    }
+    sendEmail(mailOptions, (error, info)=>{
+        if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+          }
+    });
+
     console.log(doc);
     res.status(201).json({
         status: 'success',
